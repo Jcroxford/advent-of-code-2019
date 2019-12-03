@@ -27,7 +27,7 @@ export function main () {
   const allIntersctions = findAllWireIntersections(wireOneGridPoints, wireTwoGridPoints)
 
   console.log(`answer to part one ${findShortestManhattenDistance(allIntersctions)}`)
-  console.log(`answer to part one ${findShotestJumpDistance(allIntersctions)}`)
+  console.log(`answer to part two ${findShotestJumpDistance(allIntersctions)}`)
 }
 
 export function findShortestManhattenDistance (allIntersctions: IntersectedPoint[]) {
