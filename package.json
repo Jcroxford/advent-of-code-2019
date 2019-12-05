@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon -e 'js,json,ts' -w 'src' -x ts-node src/index.ts"
+    "start": "nodemon -e 'js,json,ts' -w 'src' -x ts-node src/index.ts",
+    "test": "jest --watch"
   },
   "keywords": [],
   "author": "",
