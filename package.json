@@ -13,6 +13,7 @@
   "devDependencies": {
     "@types/jest": "^24.0.23",
     "@types/node": "^12.12.14",
+    "@types/readline-sync": "^1.4.3",
     "jest": "^24.9.0",
     "nodemon": "^2.0.1",
     "ts-jest": "^24.2.0",
@@ -21,5 +22,7 @@
     "tslint-config-standard": "^9.0.0",
     "typescript": "^3.7.2"
   },
-  "dependencies": {}
+  "dependencies": {
+    "readline-sync": "^1.4.10"
+  }
 }
