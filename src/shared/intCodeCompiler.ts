@@ -95,6 +95,8 @@ export class IntCodeCompiler {
         case IntCodeCompiler.IS_EQUAL_INSTRUCTION:
           this.isEqualInstruction(modes)
           break
+        case IntCodeCompiler.HALT_INSTRUCTION:
+          break
         default:
           throw new Error(`Unable to executure instruction ${instruction} in memory location ${this.indexOfCurrentOpcode}`)
       }
