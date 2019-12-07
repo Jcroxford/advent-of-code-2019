@@ -1,4 +1,3 @@
-// todo print memeory address with print output?
 // warning the refactor for this currently causes day 2 and day 5 to no longer work
 // todo refactor day 2 and day 5 to work with refactored code
 // todo create instruction enum
@@ -23,7 +22,6 @@ export class IntCodeCompiler {
   // used to reset int code compiler without the need for running a full constructor
   private givenCode: number[]
   private givenProgramaticInput: number[]
-  private logProgramOutput: boolean
   private indexOfCurrentOpcode = 0
 
   public memory: number[]
@@ -31,10 +29,9 @@ export class IntCodeCompiler {
   public programOutput: number[] = []
   public executionStatus: ExecutionStatus
 
-  constructor (code: string, programaticInput: number[] = [], logProgramOutput: boolean = false) {
+  constructor (code: string, programaticInput: number[] = []) {
     this.memory = code.split(',').map(Number)
     this.givenCode = [ ...this.memory ]
-    this.logProgramOutput = logProgramOutput
 
     this.programaticInput = programaticInput
     this.givenProgramaticInput = [ ...this.programaticInput ]
@@ -144,7 +141,6 @@ export class IntCodeCompiler {
     const argOne = this.useImmediateMode(modes[0]) ? this.memory[this.indexOfCurrentOpcode + 1] : this.memory[this.memory[this.indexOfCurrentOpcode + 1]]
 
     this.programOutput.push(argOne)
-    if (this.logProgramOutput) console.log('printing arg', argOne)
 
     this.indexOfCurrentOpcode += 2
   }
