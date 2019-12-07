@@ -1,24 +1,24 @@
 // warning the refactor for this currently causes day 2 and day 5 to no longer work
 // todo refactor day 2 and day 5 to work with refactored code
-// todo create instruction enum
 export enum ExecutionStatus {
   Finished,
   Reset,
   RequestingInput
 }
 
-export class IntCodeCompiler {
-  // constants/opcodes/instructions
-  static ADD_INSTRUCTION = 1
-  static MULT_INSTRUCTION = 2
-  static SAVE_INSTRUCTION = 3
-  static PRINT_INSTRUCTION = 4
-  static JUMP_IF_TRUE_INSTRUCTION = 5
-  static JUMP_IF_FALSE_INSTRUCTION = 6
-  static IS_LESS_THAN_INSTRUCTION = 7
-  static IS_EQUAL_INSTRUCTION = 8
-  static HALT_INSTRUCTION = 99
+enum IntCodeInstructions {
+  ADD_INSTRUCTION = 1,
+  MULT_INSTRUCTION = 2,
+  SAVE_INSTRUCTION = 3,
+  PRINT_INSTRUCTION = 4,
+  JUMP_IF_TRUE_INSTRUCTION = 5,
+  JUMP_IF_FALSE_INSTRUCTION = 6,
+  IS_LESS_THAN_INSTRUCTION = 7,
+  IS_EQUAL_INSTRUCTION = 8,
+  HALT_INSTRUCTION = 99
+}
 
+export class IntCodeCompiler {
   // used to reset int code compiler without the need for running a full constructor
   private givenCode: number[]
   private givenProgramaticInput: number[]
@@ -59,40 +59,40 @@ export class IntCodeCompiler {
    */
   execute (): ExecutionStatus {
     let currentInstruction = null
-    while (currentInstruction !== IntCodeCompiler.HALT_INSTRUCTION && this.indexOfCurrentOpcode < this.memory.length) {
+    while (currentInstruction !== IntCodeInstructions.HALT_INSTRUCTION && this.indexOfCurrentOpcode < this.memory.length) {
       const { instruction, modes } = this.parseOpcode(this.memory[this.indexOfCurrentOpcode])
       currentInstruction = instruction
 
       switch (currentInstruction) {
-        case IntCodeCompiler.ADD_INSTRUCTION:
+        case IntCodeInstructions.ADD_INSTRUCTION:
           this.addInstruction(modes)
           break
-        case IntCodeCompiler.MULT_INSTRUCTION:
+        case IntCodeInstructions.MULT_INSTRUCTION:
           this.multInstruction(modes)
           break
-        case IntCodeCompiler.SAVE_INSTRUCTION:
+        case IntCodeInstructions.SAVE_INSTRUCTION:
           const successful = this.saveInstruction()
           if (!successful) {
             this.executionStatus = ExecutionStatus.RequestingInput
             return this.executionStatus
           }
           break
-        case IntCodeCompiler.PRINT_INSTRUCTION:
+        case IntCodeInstructions.PRINT_INSTRUCTION:
           this.printInstruction(modes)
           break
-        case IntCodeCompiler.JUMP_IF_TRUE_INSTRUCTION:
+        case IntCodeInstructions.JUMP_IF_TRUE_INSTRUCTION:
           this.jumpIfTrueInstruction(modes)
           break
-        case IntCodeCompiler.JUMP_IF_FALSE_INSTRUCTION:
+        case IntCodeInstructions.JUMP_IF_FALSE_INSTRUCTION:
           this.jumpIfFalseInstruction(modes)
           break
-        case IntCodeCompiler.IS_LESS_THAN_INSTRUCTION:
+        case IntCodeInstructions.IS_LESS_THAN_INSTRUCTION:
           this.isLessThanInstruction(modes)
           break
-        case IntCodeCompiler.IS_EQUAL_INSTRUCTION:
+        case IntCodeInstructions.IS_EQUAL_INSTRUCTION:
           this.isEqualInstruction(modes)
           break
-        case IntCodeCompiler.HALT_INSTRUCTION:
+        case IntCodeInstructions.HALT_INSTRUCTION:
           break
         default:
           throw new Error(`Unable to executure instruction ${instruction} in memory location ${this.indexOfCurrentOpcode}`)
