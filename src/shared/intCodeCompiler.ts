@@ -1,10 +1,10 @@
-// todo move all conditional checks to functions
 // todo print memeory address with print output?
 // warning the refactor for this currently causes day 2 and day 5 to no longer work
 // todo refactor day 2 and day 5 to work with refactored code
 // todo create instruction enum
 export enum ExecutionStatus {
   Finished,
+  Reset,
   RequestingInput
 }
 
@@ -38,6 +38,7 @@ export class IntCodeCompiler {
 
     this.programaticInput = programaticInput
     this.givenProgramaticInput = [ ...this.programaticInput ]
+    this.executionStatus = ExecutionStatus.Reset
   }
 
   reset () {
@@ -45,6 +46,7 @@ export class IntCodeCompiler {
     this.programaticInput = [ ...this.givenProgramaticInput ]
     this.programOutput = []
     this.indexOfCurrentOpcode = 0
+    this.executionStatus = ExecutionStatus.Reset
 
     return this
   }
@@ -94,7 +96,7 @@ export class IntCodeCompiler {
           this.isEqualInstruction(modes)
           break
         default:
-          break
+          throw new Error(`Unable to executure instruction ${instruction} in memory location ${this.indexOfCurrentOpcode}`)
       }
     }
 
