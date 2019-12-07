@@ -28,12 +28,12 @@ export function part1 (code: string) {
   return combinations
     .map(combination => {
       ampA.reset().programaticInput = [combination[0], 0]
-      ampB.reset().programaticInput = [combination[1], ampA.chainableExecute().programOutput[0]]
-      ampC.reset().programaticInput = [combination[2], ampB.chainableExecute().programOutput[0]]
-      ampD.reset().programaticInput = [combination[3], ampC.chainableExecute().programOutput[0]]
-      ampE.reset().programaticInput = [combination[4], ampD.chainableExecute().programOutput[0]]
+      ampB.reset().programaticInput = [combination[1], ampA.execute().programOutput[0]]
+      ampC.reset().programaticInput = [combination[2], ampB.execute().programOutput[0]]
+      ampD.reset().programaticInput = [combination[3], ampC.execute().programOutput[0]]
+      ampE.reset().programaticInput = [combination[4], ampD.execute().programOutput[0]]
 
-      return { combination, thrust: ampE.chainableExecute().programOutput[0] }
+      return { combination, thrust: ampE.execute().programOutput[0] }
     })
     .sort((a, b) => b.thrust - a.thrust)[0]
 }
@@ -73,7 +73,7 @@ export function part2 (code: string) {
         amps.push(currentAmp)
       }
 
-      return { combination, thrust: ampE.chainableExecute().programOutput[0] }
+      return { combination, thrust: ampE.execute().programOutput[0] }
     })
     .sort((a, b) => b.thrust - a.thrust)[0]
 }

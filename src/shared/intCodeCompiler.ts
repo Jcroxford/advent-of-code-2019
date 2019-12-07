@@ -48,16 +48,7 @@ export class IntCodeCompiler {
     return this
   }
 
-  // same as execute except does not return value of first item in memoery and instead dot chainable
-  chainableExecute () {
-    this.execute()
-    return this
-  }
-
-  /**
-   * right now assumes whatever is at index 0 after execution should be the return value
-   */
-  execute (): ExecutionStatus {
+  execute () {
     let currentInstruction = null
     while (currentInstruction !== IntCodeInstructions.HALT_INSTRUCTION && this.indexOfCurrentOpcode < this.memory.length) {
       const { instruction, modes } = this.parseOpcode(this.memory[this.indexOfCurrentOpcode])
@@ -74,7 +65,7 @@ export class IntCodeCompiler {
           const successful = this.saveInstruction()
           if (!successful) {
             this.executionStatus = ExecutionStatus.RequestingInput
-            return this.executionStatus
+            return this
           }
           break
         case IntCodeInstructions.PRINT_INSTRUCTION:
@@ -100,7 +91,7 @@ export class IntCodeCompiler {
     }
 
     this.executionStatus = ExecutionStatus.Finished
-    return this.executionStatus
+    return this
   }
 
   private addInstruction (modes: number[]) {
