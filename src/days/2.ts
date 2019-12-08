@@ -5,39 +5,39 @@ import { getAocDataForDay } from '../utils/aocApiService'
 // exports
 // ==============================================================================================================
 export function main () {
-  let input: string = getAocDataForDay(2)
+  let code: string = getAocDataForDay(2)
 
-  console.log('part 1 results', part1(input))
-  console.log('part 2 results', part2(input))
+  console.log('part 1 results', part1(code))
+  console.log('part 2 results', part2(code))
 }
 
-export function part1 (input: string) {
+export function part1 (code: string) {
   // fix malformed data per assignment description
-  let restoredInput: string | string[] = input.split(',')
-  restoredInput[1] = '12'
-  restoredInput[2] = '2'
-  restoredInput = restoredInput.join(',')
+  let restoredCode: string | string[] = code.split(',')
+  restoredCode[1] = '12'
+  restoredCode[2] = '2'
+  restoredCode = restoredCode.join(',')
 
-  return new IntCodeCompiler(restoredInput).execute()
+  return new IntCodeCompiler(restoredCode).execute().memory[0]
 }
 
 // preliminary testing showed that changing the noun yielded large change in results
 // while changing the verb yielded small changes (typically/always one in my test cases)
-export function part2 (input: string) {
+export function part2 (code: string) {
   // provided by assignment
   const givenTargetNumber = 19690720
-  let program = new IntCodeCompiler(input)
+  let program = new IntCodeCompiler(code)
 
   let executionResults = null
   let noun = 0
   let verb = 0
 
   while (executionResults !== givenTargetNumber) {
-    program = new IntCodeCompiler(input)
+    program = new IntCodeCompiler(code)
     program.memory[1] = noun
     program.memory[2] = verb
 
-    executionResults = program.execute()
+    executionResults = program.execute().memory[0]
     if (executionResults === givenTargetNumber) {
       break
     } else if (givenTargetNumber - executionResults < 100) {
