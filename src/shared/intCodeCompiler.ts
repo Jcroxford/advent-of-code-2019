@@ -15,7 +15,14 @@ enum IntCodeInstructions {
   JUMP_IF_FALSE_INSTRUCTION = 6,
   IS_LESS_THAN_INSTRUCTION = 7,
   IS_EQUAL_INSTRUCTION = 8,
+  ADJUST_RELATIVE_BASE = 9,
   HALT_INSTRUCTION = 99
+}
+
+enum ExecutionModes {
+  POSITION_MODE = 0,
+  IMMEDIATE_MODE = 1,
+  RELATIVE_MODE = 2
 }
 
 export class IntCodeCompiler {
@@ -23,6 +30,7 @@ export class IntCodeCompiler {
   private givenCode: number[]
   private givenProgramaticInput: number[]
   private indexOfCurrentOpcode = 0
+  private relativeBase = 0
 
   public memory: number[]
   public programaticInput: number[]
@@ -44,6 +52,7 @@ export class IntCodeCompiler {
     this.programOutput = []
     this.indexOfCurrentOpcode = 0
     this.executionStatus = ExecutionStatus.Reset
+    this.relativeBase = 0
 
     return this
   }
@@ -62,7 +71,7 @@ export class IntCodeCompiler {
           this.multInstruction(modes)
           break
         case IntCodeInstructions.SAVE_INSTRUCTION:
-          const successful = this.saveInstruction()
+          const successful = this.saveInstruction(modes)
           if (!successful) {
             this.executionStatus = ExecutionStatus.RequestingInput
             return this
@@ -83,6 +92,9 @@ export class IntCodeCompiler {
         case IntCodeInstructions.IS_EQUAL_INSTRUCTION:
           this.isEqualInstruction(modes)
           break
+        case IntCodeInstructions.ADJUST_RELATIVE_BASE:
+          this.adjustRelativeBaseInstruction(modes)
+          break
         case IntCodeInstructions.HALT_INSTRUCTION:
           break
         default:
@@ -95,20 +107,18 @@ export class IntCodeCompiler {
   }
 
   private addInstruction (modes: number[]) {
-    const argOne = this.useImmediateMode(modes[0]) ? this.memory[this.indexOfCurrentOpcode + 1] : this.memory[this.memory[this.indexOfCurrentOpcode + 1]]
-    const argTwo = this.useImmediateMode(modes[1]) ? this.memory[this.indexOfCurrentOpcode + 2] : this.memory[this.memory[this.indexOfCurrentOpcode + 2]]
+    const argOne = this.pullDataFromMemory(modes[0], 1)
+    const argTwo = this.pullDataFromMemory(modes[1], 2)
 
-    // writes never immediate
-    this.memory[this.memory[this.indexOfCurrentOpcode + 3]] = argOne + argTwo
+    this.saveToMemory(argOne + argTwo, /** offset */ 3, modes[2])
     this.indexOfCurrentOpcode += 4
   }
 
   private multInstruction (modes: number[]) {
-    const argOne = this.useImmediateMode(modes[0]) ? this.memory[this.indexOfCurrentOpcode + 1] : this.memory[this.memory[this.indexOfCurrentOpcode + 1]]
-    const argTwo = this.useImmediateMode(modes[1]) ? this.memory[this.indexOfCurrentOpcode + 2] : this.memory[this.memory[this.indexOfCurrentOpcode + 2]]
+    const argOne = this.pullDataFromMemory(modes[0], 1)
+    const argTwo = this.pullDataFromMemory(modes[1], 2)
 
-    // writes never immediate
-    this.memory[this.memory[this.indexOfCurrentOpcode + 3]] = argOne * argTwo
+    this.saveToMemory(argOne * argTwo, /** offset */ 3, modes[2])
     this.indexOfCurrentOpcode += 4
   }
 
@@ -116,20 +126,21 @@ export class IntCodeCompiler {
    *
    * @retrns boolean - returns true if instruction executed successfully, false if there was no input
    */
-  private saveInstruction () {
+  private saveInstruction (modes: number[]) {
     if (!this.programaticInput.length) return false
 
     const input = this.programaticInput.shift() as number
 
-    // writes never immediate
-    this.memory[this.memory[this.indexOfCurrentOpcode + 1]] = input
+    // currently only expected to work with relative and position mode
+    this.pullDataFromMemory(modes[1], 1)
+    this.saveToMemory(input, /** offset */ 1, modes[0])
 
     this.indexOfCurrentOpcode += 2
     return true
   }
 
   private printInstruction (modes: number[]) {
-    const argOne = this.useImmediateMode(modes[0]) ? this.memory[this.indexOfCurrentOpcode + 1] : this.memory[this.memory[this.indexOfCurrentOpcode + 1]]
+    const argOne = this.pullDataFromMemory(modes[0], 1)
 
     this.programOutput.push(argOne)
 
@@ -137,39 +148,44 @@ export class IntCodeCompiler {
   }
 
   private jumpIfTrueInstruction (modes: number[]) {
-    const argOne = this.useImmediateMode(modes[0]) ? this.memory[this.indexOfCurrentOpcode + 1] : this.memory[this.memory[this.indexOfCurrentOpcode + 1]]
-    const argTwo = this.useImmediateMode(modes[1]) ? this.memory[this.indexOfCurrentOpcode + 2] : this.memory[this.memory[this.indexOfCurrentOpcode + 2]]
+    const argOne = this.pullDataFromMemory(modes[0], 1)
+    const argTwo = this.pullDataFromMemory(modes[1], 2)
 
     if (argOne) this.indexOfCurrentOpcode = argTwo
     else this.indexOfCurrentOpcode += 3
   }
 
   private jumpIfFalseInstruction (modes: number[]) {
-    const argOne = this.useImmediateMode(modes[0]) ? this.memory[this.indexOfCurrentOpcode + 1] : this.memory[this.memory[this.indexOfCurrentOpcode + 1]]
-    const argTwo = this.useImmediateMode(modes[1]) ? this.memory[this.indexOfCurrentOpcode + 2] : this.memory[this.memory[this.indexOfCurrentOpcode + 2]]
+    const argOne = this.pullDataFromMemory(modes[0], 1)
+    const argTwo = this.pullDataFromMemory(modes[1], 2)
 
     if (argOne === 0) this.indexOfCurrentOpcode = argTwo
     else this.indexOfCurrentOpcode += 3
   }
 
   private isLessThanInstruction (modes: number[]) {
-    const argOne = this.useImmediateMode(modes[0]) ? this.memory[this.indexOfCurrentOpcode + 1] : this.memory[this.memory[this.indexOfCurrentOpcode + 1]]
-    const argTwo = this.useImmediateMode(modes[1]) ? this.memory[this.indexOfCurrentOpcode + 2] : this.memory[this.memory[this.indexOfCurrentOpcode + 2]]
+    const argOne = this.pullDataFromMemory(modes[0], 1)
+    const argTwo = this.pullDataFromMemory(modes[1], 2)
 
-    // writes never immediate
-    this.memory[this.memory[this.indexOfCurrentOpcode + 3]] = argOne < argTwo ? 1 : 0
+    this.saveToMemory(argOne < argTwo ? 1 : 0, /** offset */ 3, modes[2])
 
     this.indexOfCurrentOpcode += 4
   }
 
   private isEqualInstruction (modes: number[]) {
-    const argOne = this.useImmediateMode(modes[0]) ? this.memory[this.indexOfCurrentOpcode + 1] : this.memory[this.memory[this.indexOfCurrentOpcode + 1]]
-    const argTwo = this.useImmediateMode(modes[1]) ? this.memory[this.indexOfCurrentOpcode + 2] : this.memory[this.memory[this.indexOfCurrentOpcode + 2]]
+    const argOne = this.pullDataFromMemory(modes[0], 1)
+    const argTwo = this.pullDataFromMemory(modes[1], 2)
 
-    // writes never immediate
-    this.memory[this.memory[this.indexOfCurrentOpcode + 3]] = argOne === argTwo ? 1 : 0
+    this.saveToMemory(argOne === argTwo ? 1 : 0, /** offset */ 3, modes[2])
 
     this.indexOfCurrentOpcode += 4
+  }
+
+  private adjustRelativeBaseInstruction (modes: number[]) {
+    const argOne = this.pullDataFromMemory(modes[0], 1)
+
+    this.relativeBase += argOne
+    this.indexOfCurrentOpcode += 2
   }
 
   private parseOpcode (opcode: number) {
@@ -180,7 +196,29 @@ export class IntCodeCompiler {
     return { instruction, modes }
   }
 
-  private useImmediateMode (mode: number | undefined) {
-    return mode === 1
+  private pullDataFromMemory (mode: number | undefined, offset: number) {
+    let data: number | undefined
+    switch (mode) {
+      case ExecutionModes.IMMEDIATE_MODE:
+        data = this.memory[this.indexOfCurrentOpcode + offset]
+        break
+      case ExecutionModes.RELATIVE_MODE:
+        data = this.memory[this.relativeBase + this.memory[this.indexOfCurrentOpcode + offset]]
+        break
+      case ExecutionModes.POSITION_MODE:
+      default:
+        data = this.memory[this.memory[this.indexOfCurrentOpcode + offset]]
+        break
+    }
+
+    // returning 0 by default adds support for saving to memory addresses that were not defined when the code was given
+    // tslint:disable-next-line
+    return data === undefined ? 0 : data
+  }
+
+  // currently, writes never immediate
+  private saveToMemory (data: number, offset: number, mode: number) {
+    if (mode === ExecutionModes.RELATIVE_MODE) this.memory[this.relativeBase + this.memory[this.indexOfCurrentOpcode + offset]] = data
+    else this.memory[this.memory[this.indexOfCurrentOpcode + offset]] = data
   }
 }

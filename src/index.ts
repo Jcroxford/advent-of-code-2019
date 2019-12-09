@@ -1,3 +1,3 @@
-import { main } from './days/8'
+import { main } from './days/9'
 
 main()
