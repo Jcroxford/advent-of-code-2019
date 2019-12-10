@@ -1,4 +1,4 @@
-import { getAocDataForDay } from '../utils/aocApiService'
+import { getAocDataForDay } from '../shared/aocApiService'
 import { IntCodeCompiler } from './../shared/intCodeCompiler'
 
 // ==============================================================================================================

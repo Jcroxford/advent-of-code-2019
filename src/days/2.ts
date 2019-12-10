@@ -1,5 +1,5 @@
 import { IntCodeCompiler } from './../shared/intCodeCompiler'
-import { getAocDataForDay } from '../utils/aocApiService'
+import { getAocDataForDay } from '../shared/aocApiService'
 
 // ==============================================================================================================
 // exports
